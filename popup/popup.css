@@ -129,6 +129,24 @@ body {
   -webkit-font-smoothing: antialiased;
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+}
+
+/* Chromium honors the ::-webkit-scrollbar pseudo-elements over the standard
+   scrollbar-color property above, so both are defined for full coverage. */
+body::-webkit-scrollbar { width: 10px; }
+body::-webkit-scrollbar-track { background: transparent; }
+body::-webkit-scrollbar-button { display: none; height: 0; }
+body::-webkit-scrollbar-corner { background: transparent; }
+body::-webkit-scrollbar-thumb {
+  background-color: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-pill);
+  border: 3px solid var(--md-sys-color-surface);
+  background-clip: padding-box;
+}
+body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--md-sys-color-outline);
 }
 
 .popup {
