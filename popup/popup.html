@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TabVault</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="../icons/icon32.png" alt="" width="20" height="20">
+      <h1>TabVault</h1>
+    </div>
+    <div class="header-actions">
+      <button id="backupNow" class="btn primary" title="Save a local snapshot right now">Back up now</button>
+      <button id="settingsToggle" class="btn icon" title="Settings" aria-label="Settings">&#9881;</button>
+    </div>
+  </header>
+
+  <div id="status" class="status" hidden></div>
+
+  <section id="settingsPanel" class="settings" hidden>
+    <label>Local snapshot every
+      <select id="localInterval">
+        <option value="2">2 min</option>
+        <option value="5">5 min</option>
+        <option value="10">10 min</option>
+        <option value="15">15 min</option>
+        <option value="30">30 min</option>
+      </select>
+    </label>
+    <label>Drive backup every
+      <select id="driveInterval">
+        <option value="30">30 min</option>
+        <option value="60">1 hour</option>
+        <option value="180">3 hours</option>
+        <option value="360">6 hours</option>
+        <option value="1440">24 hours</option>
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="driveAuto"> Automatic Drive backups</label>
+    <button id="saveSettings" class="btn">Save settings</button>
+  </section>
+
+  <main>
+    <section class="store local">
+      <div class="store-head">
+        <h2>This device</h2>
+        <span class="chip chip-local">Instant &middot; no sign-in</span>
+      </div>
+      <ul id="localList" class="snap-list"></ul>
+      <div id="localEmpty" class="empty" hidden>
+        <p>No local snapshots yet.</p>
+        <p class="hint">TabVault saves one automatically every <span id="emptyInterval">5</span> minutes &mdash; or click <strong>Back up now</strong> to take the first one.</p>
+      </div>
+    </section>
+
+    <section class="store drive">
+      <div class="store-head">
+        <h2>Google Drive</h2>
+        <span class="chip chip-drive">Any device &middot; Google account</span>
+      </div>
+
+      <div id="driveDisconnected" class="empty" hidden>
+        <p class="hint">Drive backups survive a reinstall or a new machine. They live in a hidden app folder only TabVault can see &mdash; never in your visible Drive files.</p>
+        <button id="connectDrive" class="btn primary">Connect Google Drive</button>
+      </div>
+
+      <div id="driveNoClientId" class="empty" hidden>
+        <p class="hint">Drive backup needs a one-time OAuth setup: add your Google client ID in <code>lib/config.js</code>. See README.md &mdash; takes about 5 minutes.</p>
+      </div>
+
+      <div id="driveConnectedArea" hidden>
+        <div class="drive-toolbar">
+          <button id="driveBackupNow" class="btn">Back up to Drive now</button>
+          <button id="disconnectDrive" class="btn subtle">Disconnect</button>
+        </div>
+        <ul id="driveList" class="snap-list"></ul>
+        <div id="driveEmpty" class="empty" hidden>
+          <p>No Drive backups yet.</p>
+          <p class="hint">Click <strong>Back up to Drive now</strong> to create the first one.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
