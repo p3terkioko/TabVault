@@ -14,6 +14,7 @@ import {
 import { captureState, stateHash } from "./lib/capture.js";
 import { saveLocalSnapshot, getLocalSnapshot } from "./lib/snapshots.js";
 import { restoreSnapshot } from "./lib/restore.js";
+import { mirrorToFolder, readSnapshotFromFolder } from "./lib/offscreen-bridge.js";
 import {
   uploadSnapshot,
   downloadSnapshot,
@@ -57,7 +58,9 @@ async function isRestoring() {
 async function runLocalBackup(reason) {
   if (await isRestoring()) return { saved: false };
   const snapshot = await captureState(reason);
-  return saveLocalSnapshot(snapshot);
+  const result = await saveLocalSnapshot(snapshot);
+  if (result.saved) await mirrorToFolder(snapshot);
+  return result;
 }
 
 // interactive=false is used by the alarm path: back up only if a token can
@@ -147,6 +150,13 @@ const handlers = {
     return { ok: true, ...result };
   },
 
+  async restoreFolder({ filename }) {
+    const res = await readSnapshotFromFolder(filename);
+    if (!res?.ok) return res;
+    const result = await restoreSnapshot(res.snapshot);
+    return { ok: true, ...result };
+  },
+
   async restoreDrive({ fileId }) {
     const snapshot = await downloadSnapshot(fileId, true);
     const result = await restoreSnapshot(snapshot);
@@ -161,6 +171,7 @@ const handlers = {
 };
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (msg?.target === "offscreen") return false;
   const handler = handlers[msg?.type];
   if (!handler) return false;
   handler(msg)

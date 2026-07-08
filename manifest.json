@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TabVault",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "Backs up your tab groups locally and to your Google Drive, and restores them after a crash, reinstall, or on a new device.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwIc650eYVIaWsMxQ/Ak2pxhYBQm1+aPYRD7oTCVIup/gUQSpwRjlCPVGwgF+lMXMYF1/ClBwKoRiDeNcSf2SttD8aNfzPEV3t41KccTHi2iO/hk6StTbjKAKGyzdQosOa5c13FKhDVuuWkQtioVVhgaI0v6Xbi5rS/WchGV1FAQMt0nMyR8PJB+7v8BPWf3yt76X193UNjwEqjGVcxNAUotsakln/svsKtJciAB9Cb24+evMMV9zfGJrQ5wzH2NhRE2LmLcPxbwZ13ztuWmnHtkPhYlDnZjjHeRPMuUIIhRTqvaV52426FWU9T9/xO5hAM13cyxjauXywCma9lv2ZwIDAQAB",
   "minimum_chrome_version": "108",
@@ -10,7 +10,8 @@
     "tabGroups",
     "storage",
     "alarms",
-    "identity"
+    "identity",
+    "offscreen"
   ],
   "host_permissions": [
     "https://www.googleapis.com/*",

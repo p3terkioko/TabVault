@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TabVault — Choose backup folder</title>
+  <link rel="stylesheet" href="picker.css">
+</head>
+<body>
+  <main>
+    <img src="../icons/icon48.png" alt="" width="40" height="40">
+    <h1>Choose backup folder</h1>
+    <p id="desc" class="desc">
+      TabVault will save snapshot JSON files here. Pick a folder you can sync or back up separately.
+    </p>
+    <p id="error" class="error" hidden></p>
+    <button id="pickBtn" class="btn primary" type="button">Choose folder&hellip;</button>
+    <button id="cancelBtn" class="btn" type="button">Cancel</button>
+    <p id="status" class="status" hidden></p>
+  </main>
+  <script type="module" src="picker.js"></script>
+</body>
+</html>
