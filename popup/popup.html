@@ -1,100 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>TabVault</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <img src="../icons/icon32.png" alt="" width="20" height="20">
-      <h1>TabVault</h1>
-    </div>
-    <div class="header-actions">
-      <button id="backupNow" class="btn primary" title="Save a local snapshot right now">Back up now</button>
-      <button id="settingsToggle" class="btn icon" title="Settings" aria-label="Settings">&#9881;</button>
-    </div>
-  </header>
+  <div class="popup">
 
-  <div id="status" class="status" hidden></div>
+    <!-- ============ App bar ============ -->
+    <header class="app-bar">
+      <div class="brand">
+        <img class="logo-icon" src="../icons/icon32.png" alt="" width="24" height="24">
+        <span class="wordmark">TabVault</span>
+      </div>
+      <div class="bar-actions">
+        <button class="btn btn-filled" id="backupNow" type="button" title="Save a local snapshot right now">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 16 V7"/>
+            <path d="m8.5 10.5 3.5 -3.5 3.5 3.5"/>
+            <path d="M5 16.5 v1.5 a2 2 0 0 0 2 2 h10 a2 2 0 0 0 2 -2 v-1.5"/>
+          </svg>
+          Back up now
+        </button>
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle color theme"
+                aria-pressed="false" title="Toggle color theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 14.2A8.3 8.3 0 0 1 9.8 4a8.3 8.3 0 1 0 10.2 10.2z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
 
-  <section id="settingsPanel" class="settings" hidden>
-    <label>Local snapshot every
-      <select id="localInterval">
-        <option value="2">2 min</option>
-        <option value="5">5 min</option>
-        <option value="10">10 min</option>
-        <option value="15">15 min</option>
-        <option value="30">30 min</option>
-      </select>
-    </label>
-    <label>Drive backup every
-      <select id="driveInterval">
-        <option value="30">30 min</option>
-        <option value="60">1 hour</option>
-        <option value="180">3 hours</option>
-        <option value="360">6 hours</option>
-        <option value="1440">24 hours</option>
-      </select>
-    </label>
-    <label class="check"><input type="checkbox" id="driveAuto"> Automatic Drive backups</label>
-    <div class="folder-setting">
-      <div class="folder-info">
-        <span class="folder-label">Backup folder</span>
-        <span id="folderName" class="folder-name">Not set</span>
-      </div>
-      <div class="folder-actions">
-        <button id="pickFolder" class="btn" type="button">Choose folder&hellip;</button>
-        <button id="clearFolder" class="btn subtle" type="button" hidden>Clear</button>
-      </div>
-      <p class="hint folder-hint">Snapshots are also saved as JSON files here. Survives profile wipes when you reinstall.</p>
-    </div>
-    <button id="saveSettings" class="btn">Save settings</button>
-  </section>
+    <div id="status" class="status" hidden></div>
 
-  <main>
-    <section class="store local">
-      <div class="store-head">
-        <h2>This device</h2>
-        <span class="chip chip-local">Instant &middot; no sign-in</span>
+    <!-- ============ Schedule (always visible) ============ -->
+    <section class="card">
+      <span class="overline">Schedule</span>
+
+      <div class="setting-row">
+        <label class="setting-label" for="localInterval">Local snapshot every</label>
+        <div class="interval-control">
+          <div class="select-wrap">
+            <select id="localInterval">
+              <option value="2">2 min</option>
+              <option value="5">5 min</option>
+              <option value="10">10 min</option>
+              <option value="15">15 min</option>
+              <option value="30">30 min</option>
+              <option value="custom">Custom&hellip;</option>
+            </select>
+            <svg class="select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </div>
+          <input type="number" id="localIntervalCustom" class="interval-custom"
+                 min="1" max="43200" step="1" placeholder="min" aria-label="Custom minutes" hidden>
+        </div>
       </div>
-      <ul id="localList" class="snap-list"></ul>
-      <div id="localEmpty" class="empty" hidden>
-        <p>No local snapshots yet.</p>
-        <p class="hint">TabVault saves one automatically every <span id="emptyInterval">5</span> minutes &mdash; or click <strong>Back up now</strong> to take the first one.</p>
+
+      <div class="setting-row">
+        <label class="setting-label" for="driveInterval">Drive backup every</label>
+        <div class="interval-control">
+          <div class="select-wrap">
+            <select id="driveInterval">
+              <option value="30">30 min</option>
+              <option value="60">1 hour</option>
+              <option value="180">3 hours</option>
+              <option value="360">6 hours</option>
+              <option value="1440">24 hours</option>
+              <option value="custom">Custom&hellip;</option>
+            </select>
+            <svg class="select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </div>
+          <input type="number" id="driveIntervalCustom" class="interval-custom"
+                 min="1" max="43200" step="1" placeholder="min" aria-label="Custom minutes" hidden>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-label" id="driveAutoLabel">Automatic Drive backups</span>
+        <button class="switch" id="driveAuto" type="button" role="switch"
+                aria-checked="true" aria-labelledby="driveAutoLabel">
+          <span class="switch-thumb">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m5 12.5 4.5 4.5 9-10"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      <div class="save-row">
+        <button class="btn btn-filled" id="saveSettings" type="button">Save settings</button>
       </div>
     </section>
 
-    <section class="store drive">
-      <div class="store-head">
-        <h2>Google Drive</h2>
-        <span class="chip chip-drive">Any device &middot; Google account</span>
+    <!-- ============ Backup folder (always visible) ============ -->
+    <section class="card">
+      <div class="folder-head">
+        <span class="folder-title">Backup folder</span>
+        <span class="folder-status" id="folderName">Not set</span>
+      </div>
+
+      <div class="folder-actions">
+        <button class="btn btn-tonal" id="pickFolder" type="button">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3.5 7.5 a2 2 0 0 1 2 -2 h4l2 2.5h7 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 z"/>
+          </svg>
+          Choose folder&hellip;
+        </button>
+        <button class="btn btn-text" id="clearFolder" type="button" hidden>Clear</button>
+      </div>
+
+      <p class="caption">Snapshots are also saved as JSON files here. Survives profile wipes when you reinstall.</p>
+    </section>
+
+    <!-- ============ This device ============ -->
+    <section class="card dest-section">
+      <div class="dest-head">
+        <div class="dest-icon dest-icon-device" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3.5" y="5" width="17" height="11.5" rx="1.8"/>
+            <path d="M8.5 20 h7"/>
+            <path d="M12 16.5 V20"/>
+          </svg>
+        </div>
+        <div class="dest-text">
+          <span class="dest-title">This device</span>
+          <span class="dest-sub">Instant &middot; no sign-in</span>
+        </div>
+        <span class="status-dot" role="img" aria-label="Active"></span>
+      </div>
+
+      <ul id="localList" class="snap-list"></ul>
+      <button id="localShowMore" class="btn btn-text list-toggle" type="button" hidden></button>
+      <div id="localEmpty" class="empty" hidden>
+        <p class="empty-title">No local snapshots yet</p>
+        <p class="caption">TabVault saves one automatically every <span id="emptyInterval">5</span> minutes &mdash; or click <strong>Back up now</strong> to take the first one.</p>
+      </div>
+    </section>
+
+    <!-- ============ Google Drive ============ -->
+    <section class="card dest-section">
+      <div class="dest-head">
+        <div class="dest-icon dest-icon-drive" aria-hidden="true">
+          <svg viewBox="0 0 87.3 78">
+            <path fill="#0066da" d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5z"/>
+            <path fill="#00ac47" d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A9.06 9.06 0 0 0 0 53h27.5z"/>
+            <path fill="#ea4335" d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75L86.1 57.5c.8-1.4 1.2-2.95 1.2-4.5H59.798l5.852 11.5z"/>
+            <path fill="#00832d" d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z"/>
+            <path fill="#2684fc" d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z"/>
+            <path fill="#ffba00" d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25 59.8 53h27.45c0-1.55-.4-3.1-1.2-4.5z"/>
+          </svg>
+        </div>
+        <div class="dest-text">
+          <span class="dest-title">Google Drive</span>
+          <span class="dest-sub">Any device &middot; Google account</span>
+        </div>
       </div>
 
       <div id="driveDisconnected" class="empty" hidden>
-        <p class="hint">Drive backups survive a reinstall or a new machine. They live in a hidden app folder only TabVault can see &mdash; never in your visible Drive files.</p>
-        <button id="connectDrive" class="btn primary">Connect Google Drive</button>
+        <p class="caption">Drive backups survive a reinstall or a new machine. They live in a hidden app folder only TabVault can see &mdash; never in your visible Drive files.</p>
+        <button id="connectDrive" class="btn btn-filled" type="button">Connect Google Drive</button>
+        <button id="changeClientId1" class="btn btn-text change-client-id" type="button">Change client ID&hellip;</button>
       </div>
 
       <div id="driveNoClientId" class="empty" hidden>
-        <p class="hint">Drive backup needs a one-time OAuth setup: add your Google client ID in <code>lib/config.js</code>. See README.md &mdash; takes about 5 minutes.</p>
+        <p class="caption">Drive backup needs a one-time OAuth client ID from
+          <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>
+          &mdash; see README.md for the 5-minute setup. Paste it here, nothing to edit in code.</p>
+        <div class="folder-actions">
+          <input type="text" id="clientIdInput" class="interval-custom client-id-input"
+                 placeholder="xxxxx.apps.googleusercontent.com" aria-label="Google OAuth client ID">
+          <button id="saveClientId" class="btn btn-filled" type="button">Save</button>
+        </div>
       </div>
 
       <div id="driveConnectedArea" hidden>
         <div class="drive-toolbar">
-          <button id="driveBackupNow" class="btn">Back up to Drive now</button>
-          <button id="disconnectDrive" class="btn subtle">Disconnect</button>
+          <button id="driveBackupNow" class="btn btn-tonal" type="button">Back up to Drive now</button>
+          <button id="disconnectDrive" class="btn btn-text" type="button">Disconnect</button>
         </div>
         <ul id="driveList" class="snap-list"></ul>
+        <button id="driveShowMore" class="btn btn-text list-toggle" type="button" hidden></button>
         <div id="driveEmpty" class="empty" hidden>
-          <p>No Drive backups yet.</p>
-          <p class="hint">Click <strong>Back up to Drive now</strong> to create the first one.</p>
+          <p class="empty-title">No Drive backups yet</p>
+          <p class="caption">Click <strong>Back up to Drive now</strong> to create the first one.</p>
         </div>
+        <button id="changeClientId2" class="btn btn-text change-client-id" type="button">Change client ID&hellip;</button>
       </div>
     </section>
-  </main>
 
+  </div>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

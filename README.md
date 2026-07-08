@@ -60,11 +60,13 @@ cannot see the rest of your Drive.
      type only works with `getAuthToken`, which Brave/Edge lack).
    - Authorized redirect URI:
      `https://pblgmlmoikfndpgpgndmjhldbodlojeo.chromiumapp.org/`
-5. Copy the client ID into `OAUTH_CLIENT_ID` in [`lib/config.js`](lib/config.js),
-   then reload the extension from the extensions page.
-6. Open the popup and click **Connect Google Drive** in the Drive section.
-   Sign-in happens only when you use the Drive section — never on ordinary
-   popup use or in the background.
+5. Copy the client ID, open the TabVault popup, and paste it into the
+   **Drive** section's client ID field, then click **Save**. Nothing to edit
+   in code — it's kept in `chrome.storage.local`. Use the **Change client
+   ID…** link if you need to update it later.
+6. Click **Connect Google Drive** in the Drive section. Sign-in happens only
+   when you use the Drive section — never on ordinary popup use or in the
+   background.
 
 Note: Google OAuth "test mode" grants expire after 7 days of inactivity per
 token, but TabVault silently refreshes while your browser has an active
