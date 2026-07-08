@@ -6,6 +6,12 @@
 import { getSettings, isClientIdConfigured } from "../lib/config.js";
 import { listLocalSnapshots } from "../lib/snapshots.js";
 import {
+  getBackupFolderHandle,
+  clearBackupFolder,
+  listFolderSnapshots,
+  isFolderAccessible
+} from "../lib/folder.js";
+import {
   listDriveSnapshots,
   isConnected,
   disconnect,
@@ -48,7 +54,8 @@ const REASON_LABELS = {
   auto: "",
   manual: "manual",
   "window-close": "window closed",
-  install: "first run"
+  install: "first run",
+  folder: "from folder"
 };
 
 function snapshotRow({ time, groups, tabs, reason, onRestore }) {
@@ -104,8 +111,29 @@ function snapshotRow({ time, groups, tabs, reason, onRestore }) {
   return li;
 }
 
-async function renderLocal() {
+async function mergedLocalSnapshots() {
   const index = await listLocalSnapshots();
+  const merged = index.map((entry) => ({ ...entry, source: "storage" }));
+  const seenAt = new Set(merged.map((e) => e.createdAt));
+
+  if (await isFolderAccessible()) {
+    const handle = await getBackupFolderHandle(false);
+    if (handle) {
+      for (const entry of await listFolderSnapshots(handle)) {
+        if (!seenAt.has(entry.createdAt)) {
+          merged.push(entry);
+          seenAt.add(entry.createdAt);
+        }
+      }
+    }
+  }
+
+  merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  return merged;
+}
+
+async function renderLocal() {
+  const index = await mergedLocalSnapshots();
   const list = $("localList");
   list.replaceChildren();
   $("localEmpty").hidden = index.length > 0;
@@ -117,9 +145,30 @@ async function renderLocal() {
         groups: entry.groupCount,
         tabs: entry.tabCount,
         reason: entry.reason,
-        onRestore: () => send({ type: "restoreLocal", id: entry.id })
+        onRestore: () =>
+          entry.source === "folder"
+            ? send({ type: "restoreFolder", filename: entry.filename })
+            : send({ type: "restoreLocal", id: entry.id })
       })
     );
+  }
+}
+
+async function updateFolderUI() {
+  const { backupFolderName } = await chrome.storage.local.get("backupFolderName");
+  const accessible = await isFolderAccessible();
+  const nameEl = $("folderName");
+  const clearBtn = $("clearFolder");
+
+  if (backupFolderName && accessible) {
+    nameEl.textContent = backupFolderName;
+    clearBtn.hidden = false;
+  } else if (backupFolderName && !accessible) {
+    nameEl.textContent = `${backupFolderName} (permission needed — choose again)`;
+    clearBtn.hidden = false;
+  } else {
+    nameEl.textContent = "Not set";
+    clearBtn.hidden = true;
   }
 }
 
@@ -247,6 +296,27 @@ $("saveSettings").addEventListener("click", async () => {
   showStatus("Settings saved ✓");
 });
 
+$("pickFolder").addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("picker/picker.html") });
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local" || !changes.backupFolderName) return;
+  updateFolderUI();
+  renderLocal();
+  if (changes.backupFolderName.newValue) {
+    showStatus(`Backup folder set: ${changes.backupFolderName.newValue} ✓`);
+  }
+});
+
+$("clearFolder").addEventListener("click", async () => {
+  await clearBackupFolder();
+  await chrome.storage.local.remove("backupFolderName");
+  await updateFolderUI();
+  await renderLocal();
+  showStatus("Backup folder cleared");
+});
+
 // ---------- init ----------
 
 (async function init() {
@@ -257,5 +327,6 @@ $("saveSettings").addEventListener("click", async () => {
   $("emptyInterval").textContent = settings.localIntervalMin;
 
   await renderLocal();
+  await updateFolderUI();
   await initDriveSection();
 })();

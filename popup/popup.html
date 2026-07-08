@@ -39,6 +39,17 @@
       </select>
     </label>
     <label class="check"><input type="checkbox" id="driveAuto"> Automatic Drive backups</label>
+    <div class="folder-setting">
+      <div class="folder-info">
+        <span class="folder-label">Backup folder</span>
+        <span id="folderName" class="folder-name">Not set</span>
+      </div>
+      <div class="folder-actions">
+        <button id="pickFolder" class="btn" type="button">Choose folder&hellip;</button>
+        <button id="clearFolder" class="btn subtle" type="button" hidden>Clear</button>
+      </div>
+      <p class="hint folder-hint">Snapshots are also saved as JSON files here. Survives profile wipes when you reinstall.</p>
+    </div>
     <button id="saveSettings" class="btn">Save settings</button>
   </section>
 
