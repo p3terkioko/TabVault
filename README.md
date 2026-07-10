@@ -62,8 +62,9 @@ cannot see the rest of your Drive.
      `https://pblgmlmoikfndpgpgndmjhldbodlojeo.chromiumapp.org/`
 5. Copy the client ID, open the TabVault popup, and paste it into the
    **Drive** section's client ID field, then click **Save**. Nothing to edit
-   in code — it's kept in `chrome.storage.local`. Use the **Change client
-   ID…** link if you need to update it later.
+   in code — it's kept in `chrome.storage.sync`, so if you have browser
+   profile sync on it propagates to your other devices automatically. Use the
+   **Change client ID…** link if you need to update it later.
 6. Click **Connect Google Drive** in the Drive section. Sign-in happens only
    when you use the Drive section — never on ordinary popup use or in the
    background.
@@ -72,6 +73,19 @@ Note: Google OAuth "test mode" grants expire after 7 days of inactivity per
 token, but TabVault silently refreshes while your browser has an active
 Google session; if the silent refresh ever fails, the popup simply shows the
 **Connect** button again.
+
+### Restoring on another device
+
+This is what the Drive tier is for. Drive backups live in a hidden folder
+tied to your **Google account**, not to any one machine, so on a new device:
+
+1. Load TabVault (its extension ID is fixed, so the same OAuth client works).
+2. Enter the **same client ID** — or, with browser sync on, it's already
+   there.
+3. Click **Connect Google Drive** and sign in with the **same Google
+   account**.
+4. Every Drive backup from your other devices appears in the list with its
+   timestamp and group/tab counts — click **Restore** on any of them.
 
 ## How it works
 
