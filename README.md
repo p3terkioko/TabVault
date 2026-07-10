@@ -117,6 +117,29 @@ Implementation notes:
   `edge://`, extension pages) can't be reopened by extensions and are
   skipped, with a count shown after restore.
 
+## Versioning
+
+`manifest.json`'s `version` bumps automatically on commit, based on the
+commit message's [Conventional Commits](https://www.conventionalcommits.org/)
+prefix:
+
+| Commit message | Bump |
+|---|---|
+| `feat!: ...` or a `BREAKING CHANGE:` footer | major (`1.2.3` → `2.0.0`) |
+| `feat: ...` | minor (`1.2.3` → `1.3.0`) |
+| anything else (`fix:`, `chore:`, `docs:`, unprefixed, ...) | patch (`1.2.3` → `1.2.4`) |
+| a merge commit (`Merge ...`) | skipped — never double-bumps a branch's own bumps |
+
+This is a git hook (`.githooks/commit-msg`), not a background service, so it
+only runs on your machine when you commit — enable it once per clone:
+
+```
+git config core.hooksPath .githooks
+```
+
+To commit without bumping the version (e.g. editing this README), use
+`git commit --no-verify`.
+
 ## Browser compatibility notes
 
 - **Brave** supports Chrome Web Store extensions unmodified. The one known

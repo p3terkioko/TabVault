@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Auto-bumps manifest.json's "version" based on the commit message, using
+# Conventional Commit prefixes:
+#   feat!:  or a "BREAKING CHANGE:" footer -> major
+#   feat:                                  -> minor
+#   anything else (fix:, chore:, docs:, unprefixed, ...) -> patch
+#   Merge commits are skipped entirely, so merging a branch never
+#   double-bumps on top of that branch's own bumps.
+#
+# Enabled once per clone with:  git config core.hooksPath .githooks
+# Skip for a single commit with: git commit --no-verify
+
+set -e
+
+MSG_FILE="$1"
+MANIFEST="manifest.json"
+
+[ -f "$MANIFEST" ] || exit 0
+
+MSG_HEAD="$(head -n1 "$MSG_FILE")"
+case "$MSG_HEAD" in
+  "Merge "*) exit 0 ;;
+esac
+
+BODY="$(cat "$MSG_FILE")"
+
+# Patterns live in variables, not inline in [[ =~ ]] — embedding the parens
+# directly trips up Git Bash's regex parsing.
+BREAKING_RE='^[a-zA-Z]+(\([^)]*\))?!:'
+FEAT_RE='^feat(\([^)]*\))?:'
+
+if [[ "$MSG_HEAD" =~ $BREAKING_RE ]] || grep -q "^BREAKING CHANGE:" <<< "$BODY"; then
+  BUMP=major
+elif [[ "$MSG_HEAD" =~ $FEAT_RE ]]; then
+  BUMP=minor
+else
+  BUMP=patch
+fi
+
+CURRENT="$(grep -m1 '"version"' "$MANIFEST" | sed -E 's/.*"version": *"([0-9]+)\.([0-9]+)\.([0-9]+)".*/\1 \2 \3/')"
+if [[ -z "$CURRENT" || "$CURRENT" == "$(cat "$MANIFEST")" ]]; then
+  echo "commit-msg: couldn't parse manifest.json version (expected X.Y.Z) — skipping bump" >&2
+  exit 0
+fi
+read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+case "$BUMP" in
+  major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+  minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+  patch) PATCH=$((PATCH + 1)) ;;
+esac
+
+NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+sed -i -E "0,/\"version\": *\"[0-9]+\.[0-9]+\.[0-9]+\"/s//\"version\": \"$NEW_VERSION\"/" "$MANIFEST"
+git add "$MANIFEST"
+
+echo "commit-msg: bumped manifest.json version -> $NEW_VERSION ($BUMP)"
